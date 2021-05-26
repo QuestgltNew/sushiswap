@@ -18,7 +18,7 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
 
     /// @notice Info of each MCV2 user.
     /// `amount` LP token amount the user has provided.
-    /// `rewardDebt` The amount of SUSHI entitled to the user.
+    /// `rewardDebt` The amount of Apes entitled to the user.
     struct UserInfo {
         uint256 amount;
         uint256 rewardDebt;
@@ -26,9 +26,9 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
 
     /// @notice Info of each MCV2 pool.
     /// `allocPoint` The amount of allocation points assigned to the pool.
-    /// Also known as the amount of SUSHI to distribute per block.
+    /// Also known as the amount of Apes to distribute per block.
     struct PoolInfo {
-        uint128 accSushiPerShare;
+        uint128 accApesPerShare;
         uint64 lastRewardBlock;
         uint64 allocPoint;
     }
@@ -51,7 +51,7 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
     event LogOnReward(address indexed user, uint256 indexed pid, uint256 amount, address indexed to);
     event LogPoolAddition(uint256 indexed pid, uint256 allocPoint);
     event LogSetPool(uint256 indexed pid, uint256 allocPoint);
-    event LogUpdatePool(uint256 indexed pid, uint64 lastRewardBlock, uint256 lpSupply, uint256 accSushiPerShare);
+    event LogUpdatePool(uint256 indexed pid, uint64 lastRewardBlock, uint256 lpSupply, uint256 accApesPerShare);
     event LogInit();
 
     constructor (IERC20 _rewardToken, uint256 _tokenPerBlock, address _MASTERCHEF_V2) public {
@@ -67,13 +67,13 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
         uint256 pending;
         if (user.amount > 0) {
             pending =
-                (user.amount.mul(pool.accSushiPerShare) / ACC_TOKEN_PRECISION).sub(
+                (user.amount.mul(pool.accApesPerShare) / ACC_TOKEN_PRECISION).sub(
                     user.rewardDebt
                 );
             rewardToken.safeTransfer(to, pending);
         }
         user.amount = lpToken;
-        user.rewardDebt = lpToken.mul(pool.accSushiPerShare) / ACC_TOKEN_PRECISION;
+        user.rewardDebt = lpToken.mul(pool.accApesPerShare) / ACC_TOKEN_PRECISION;
         emit LogOnReward(_user, pid, pending, to);
     }
     
@@ -110,13 +110,13 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
         poolInfo[_pid] = PoolInfo({
             allocPoint: allocPoint.to64(),
             lastRewardBlock: lastRewardBlock.to64(),
-            accSushiPerShare: 0
+            accApesPerShare: 0
         });
         poolIds.push(_pid);
         emit LogPoolAddition(_pid, allocPoint);
     }
 
-    /// @notice Update the given pool's SUSHI allocation point and `IRewarder` contract. Can only be called by the owner.
+    /// @notice Update the given pool's Apes allocation point and `IRewarder` contract. Can only be called by the owner.
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _allocPoint New AP of the pool.
     function set(uint256 _pid, uint256 _allocPoint) public onlyOwner {
@@ -128,18 +128,18 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
     /// @notice View function to see pending Token
     /// @param _pid The index of the pool. See `poolInfo`.
     /// @param _user Address of user.
-    /// @return pending SUSHI reward for a given user.
+    /// @return pending Apes reward for a given user.
     function pendingToken(uint256 _pid, address _user) public view returns (uint256 pending) {
         PoolInfo memory pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        uint256 accSushiPerShare = pool.accSushiPerShare;
+        uint256 accApesPerShare = pool.accApesPerShare;
         uint256 lpSupply = MasterChefV2(MASTERCHEF_V2).lpToken(_pid).balanceOf(MASTERCHEF_V2);
         if (block.number > pool.lastRewardBlock && lpSupply != 0) {
             uint256 blocks = block.number.sub(pool.lastRewardBlock);
-            uint256 sushiReward = blocks.mul(tokenPerBlock).mul(pool.allocPoint) / totalAllocPoint;
-            accSushiPerShare = accSushiPerShare.add(sushiReward.mul(ACC_TOKEN_PRECISION) / lpSupply);
+            uint256 apesReward = blocks.mul(tokenPerBlock).mul(pool.allocPoint) / totalAllocPoint;
+            accApesPerShare = accApesPerShare.add(apesReward.mul(ACC_TOKEN_PRECISION) / lpSupply);
         }
-        pending = (user.amount.mul(accSushiPerShare) / ACC_TOKEN_PRECISION).sub(user.rewardDebt);
+        pending = (user.amount.mul(accApesPerShare) / ACC_TOKEN_PRECISION).sub(user.rewardDebt);
     }
 
     /// @notice Update reward variables for all pools. Be careful of gas spending!
@@ -162,12 +162,12 @@ contract ComplexRewarder is IRewarder,  BoringOwnable{
 
             if (lpSupply > 0) {
                 uint256 blocks = block.number.sub(pool.lastRewardBlock);
-                uint256 sushiReward = blocks.mul(tokenPerBlock).mul(pool.allocPoint) / totalAllocPoint;
-                pool.accSushiPerShare = pool.accSushiPerShare.add((sushiReward.mul(ACC_TOKEN_PRECISION) / lpSupply).to128());
+                uint256 apesReward = blocks.mul(tokenPerBlock).mul(pool.allocPoint) / totalAllocPoint;
+                pool.accApesPerShare = pool.accApesPerShare.add((apesReward.mul(ACC_TOKEN_PRECISION) / lpSupply).to128());
             }
             pool.lastRewardBlock = block.number.to64();
             poolInfo[pid] = pool;
-            emit LogUpdatePool(pid, pool.lastRewardBlock, lpSupply, pool.accSushiPerShare);
+            emit LogUpdatePool(pid, pool.lastRewardBlock, lpSupply, pool.accApesPerShare);
         }
     }
 

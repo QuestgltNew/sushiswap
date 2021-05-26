@@ -8,8 +8,8 @@ module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts,
   const chainId = await getChainId()
 
   const factory = await ethers.getContract("UniswapV2Factory")
-  const bar = await ethers.getContract("SushiBar")
-  const sushi = await ethers.getContract("SushiToken")
+  const bar = await ethers.getContract("ApesBar")
+  const apes = await ethers.getContract("ApesToken")
   
   let wethAddress;
   
@@ -21,19 +21,19 @@ module.exports = async function ({ ethers: { getNamedSigner }, getNamedAccounts,
     throw Error("No WETH!")
   }
 
-  await deploy("SushiMaker", {
+  await deploy("ApesMaker", {
     from: deployer,
-    args: [factory.address, bar.address, sushi.address, wethAddress],
+    args: [factory.address, bar.address, apes.address, wethAddress],
     log: true,
     deterministicDeployment: false
   })
 
-  const maker = await ethers.getContract("SushiMaker")
+  const maker = await ethers.getContract("ApesMaker")
   if (await maker.owner() !== dev) {
     console.log("Setting maker owner")
     await (await maker.transferOwnership(dev, true, false)).wait()
   }
 }
 
-module.exports.tags = ["SushiMaker"]
-module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02", "SushiBar", "SushiToken"]
+module.exports.tags = ["ApesMaker"]
+module.exports.dependencies = ["UniswapV2Factory", "UniswapV2Router02", "ApesBar", "ApesToken"]
