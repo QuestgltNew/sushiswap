@@ -20,7 +20,7 @@ import { removeConsoleLog } from "hardhat-preprocessor"
 
 const accounts = {
   mnemonic: process.env.MNEMONIC || "test test test test test test test test test test test junk",
-  // accountsBalance: "990000000000000000000",
+  accountsBalance: "1000000000000000000000",
 }
 
 const config: HardhatUserConfig = {
@@ -77,7 +77,7 @@ const config: HardhatUserConfig = {
       tags: ["test", "local"],
     },
     ropsten: {
-      url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://eth-ropsten.alchemyapi.io/v2/eEnPo8xqVrr4mI8y5OUaCcaMuTlMVvNt`,
       accounts,
       chainId: 3,
       live: true,

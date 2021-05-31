@@ -11,7 +11,7 @@ module.exports = async function ({ ethers, deployments, getNamedAccounts }) {
     log: true,
     deterministicDeployment: false
   })
-
+  console.log("MasterChef deployed to:", address);
   if (await apes.owner() !== address) {
     // Transfer APES Ownership to Chef
     console.log("Transfer APES Ownership to Chef")

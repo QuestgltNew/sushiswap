@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/mocks/WETH9Mock.sol": {
+      "content": "// SPDX-License-Identifier: MIT\r\n\r\npragma solidity 0.6.12;\r\n\r\ncontract WETH9Mock {\r\n\tstring public name = \"Wrapped Ether\";\r\n\tstring public symbol = \"WETH\";\r\n\tuint8 public decimals = 18;\r\n\r\n\tevent Approval(address indexed src, address indexed guy, uint256 wad);\r\n\tevent Transfer(address indexed src, address indexed dst, uint256 wad);\r\n\tevent Deposit(address indexed dst, uint256 wad);\r\n\tevent Withdrawal(address indexed src, uint256 wad);\r\n\r\n\tmapping(address => uint256) public balanceOf;\r\n\tmapping(address => mapping(address => uint256)) public allowance;\r\n\r\n\tfunction deposit() public payable {\r\n\t\tbalanceOf[msg.sender] += msg.value;\r\n\t\temit Deposit(msg.sender, msg.value);\r\n\t}\r\n\r\n\tfunction withdraw(uint256 wad) public {\r\n\t\trequire(balanceOf[msg.sender] >= wad, \"WETH9: Error\");\r\n\t\tbalanceOf[msg.sender] -= wad;\r\n\t\tmsg.sender.transfer(wad);\r\n\t\temit Withdrawal(msg.sender, wad);\r\n\t}\r\n\r\n\tfunction totalSupply() public view returns (uint256) {\r\n\t\treturn address(this).balance;\r\n\t}\r\n\r\n\tfunction approve(address guy, uint256 wad) public returns (bool) {\r\n\t\tallowance[msg.sender][guy] = wad;\r\n\t\temit Approval(msg.sender, guy, wad);\r\n\t\treturn true;\r\n\t}\r\n\r\n\tfunction transfer(address dst, uint256 wad) public returns (bool) {\r\n\t\treturn transferFrom(msg.sender, dst, wad);\r\n\t}\r\n\r\n\tfunction transferFrom(\r\n\t\taddress src,\r\n\t\taddress dst,\r\n\t\tuint256 wad\r\n\t) public returns (bool) {\r\n\t\trequire(balanceOf[src] >= wad, \"WETH9: Error\");\r\n\r\n\t\tif (src != msg.sender && allowance[src][msg.sender] != uint256(-1)) {\r\n\t\t\trequire(allowance[src][msg.sender] >= wad, \"WETH9: Error\");\r\n\t\t\tallowance[src][msg.sender] -= wad;\r\n\t\t}\r\n\r\n\t\tbalanceOf[src] -= wad;\r\n\t\tbalanceOf[dst] += wad;\r\n\r\n\t\temit Transfer(src, dst, wad);\r\n\r\n\t\treturn true;\r\n\t}\r\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
